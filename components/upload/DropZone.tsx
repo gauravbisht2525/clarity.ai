@@ -46,8 +46,8 @@ export default function DropZone() {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={[
-        "w-full rounded-2xl border border-dashed bg-surface",
-        "px-8 py-16 flex flex-col items-center gap-4",
+        "w-full rounded-2xl border-[1.5px] border-dashed bg-surface",
+        "px-8 py-12 flex flex-col items-center gap-6",
         "cursor-pointer select-none",
         "transition-colors duration-150",
         isDragging
@@ -62,12 +62,12 @@ export default function DropZone() {
         strokeWidth={1.5}
       />
 
-      <div className="text-center space-y-1">
-        <p className="text-sm text-secondary">Drag and drop your file here</p>
-        <p className="text-sm text-accent">or click to browse</p>
+      <div className="text-center space-y-2">
+        <p className="text-[15px] text-secondary">Drag and drop your file here</p>
+        <p className="text-[15px] text-accent">or click to browse</p>
       </div>
 
-      <p className="text-xs text-muted">Supports PDF and TXT up to 10MB</p>
+      <p className="text-[13px] text-muted">Supports PDF and TXT up to 10MB</p>
 
       <input
         ref={inputRef}

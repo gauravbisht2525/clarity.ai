@@ -16,14 +16,17 @@
   /* ── Typography ─────────────────────────────────── */
   --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
-  /* ── Spacing scale (8px base) ───────────────────── */
-  --spacing-1: 8px;
-  --spacing-2: 16px;
-  --spacing-3: 24px;
-  --spacing-4: 32px;
-  --spacing-6: 48px;
-  --spacing-8: 64px;
 }
+
+/*
+  ── Spacing reference (8px grid, Tailwind default scale) ──
+  8px  → *-2   (gap-2, p-2, etc.)
+  16px → *-4
+  24px → *-6
+  32px → *-8
+  48px → *-12
+  64px → *-16
+*/
 
 /* ── Base resets ──────────────────────────────────── */
 *,

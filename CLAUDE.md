@@ -120,16 +120,16 @@ AI Layer (@anthropic-ai/sdk)
 
 ### Colors
 
-| Token | Value | Usage |
-|---|---|---|
-| `--color-bg` | `#0F0F0F` | Page background |
-| `--color-surface` | `#1A1A1A` | Cards, upload area |
-| `--color-border` | `#2E2E2E` | Dashed borders, dividers |
-| `--color-text-primary` | `#FFFFFF` | Headings, primary text |
-| `--color-text-secondary` | `#8A8A8A` | Subtext, helper text, labels |
-| `--color-text-muted` | `#555555` | Italicized notes (e.g. "never stored") |
-| `--color-accent` | `#E8613A` | Logo, CTAs, links, highlights |
-| `--color-accent-hover` | `#D04E2A` | Hover state for accent elements |
+| Token | Tailwind Class | Value | Usage |
+|---|---|---|---|
+| `--color-background` | `bg-background` | `#0F0F0F` | Page background |
+| `--color-surface` | `bg-surface` | `#1A1A1A` | Cards, upload area |
+| `--color-border` | `border-border` / `bg-border` | `#2E2E2E` | Dashed borders, dividers |
+| `--color-primary` | `text-primary` | `#FFFFFF` | Headings, primary text |
+| `--color-secondary` | `text-secondary` | `#8A8A8A` | Subtext, helper text, labels |
+| `--color-muted` | `text-muted` | `#555555` | Italicized notes (e.g. "never stored") |
+| `--color-accent` | `text-accent` / `bg-accent` | `#E8613A` | Logo, CTAs, links, highlights |
+| `--color-accent-dark` | `text-accent-dark` | `#D04E2A` | Hover state for accent elements |
 
 ### Typography
 
@@ -156,16 +156,18 @@ AI Layer (@anthropic-ai/sdk)
 
 ### Spacing Scale
 
-Uses an `8px` base grid:
+Uses an `8px` base grid via **Tailwind's default spacing scale** (4px base unit).
 
-| Token | Value | Usage |
+> ⚠️ Do NOT define `--spacing-N` tokens in `@theme` — they override Tailwind's utility scale and break icon/component sizing.
+
+| Design Value | Tailwind Utility | Usage |
 |---|---|---|
-| `--space-1` | `8px` | Tight inner padding |
-| `--space-2` | `16px` | Component padding |
-| `--space-3` | `24px` | Section gaps |
-| `--space-4` | `32px` | Card padding |
-| `--space-6` | `48px` | Large section spacing |
-| `--space-8` | `64px` | Hero vertical padding |
+| `8px` | `*-2` (e.g. `gap-2`, `p-2`) | Tight inner padding |
+| `16px` | `*-4` | Component padding |
+| `24px` | `*-6` | Section gaps |
+| `32px` | `*-8` | Card padding |
+| `48px` | `*-12` | Large section spacing |
+| `64px` | `*-16` | Hero vertical padding |
 
 ### Borders
 
