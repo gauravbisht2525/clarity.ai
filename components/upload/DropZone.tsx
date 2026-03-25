@@ -4,7 +4,27 @@ import { useRef, useState } from "react";
 import type { DragEvent, ChangeEvent } from "react";
 import { CloudUpload } from "lucide-react";
 
-export default function DropZone() {
+const ACCEPTED_TYPES = ["application/pdf", "text/plain"];
+const ACCEPTED_EXTENSIONS = [".pdf", ".txt"];
+const MAX_BYTES = 4.5 * 1024 * 1024; // 4.5MB — Vercel serverless body limit
+
+interface DropZoneProps {
+  onFileSelect: (file: File) => void;
+  onError?: (message: string) => void;
+}
+
+function isValidFile(file: File): string | null {
+  const ext = "." + file.name.split(".").pop()?.toLowerCase();
+  if (!ACCEPTED_TYPES.includes(file.type) && !ACCEPTED_EXTENSIONS.includes(ext)) {
+    return "Only PDF and TXT files are supported.";
+  }
+  if (file.size > MAX_BYTES) {
+    return "File exceeds 4.5MB. Try pasting the text instead.";
+  }
+  return null;
+}
+
+export default function DropZone({ onFileSelect, onError }: DropZoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -22,17 +42,18 @@ export default function DropZone() {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files?.[0];
-    if (file) handleFile(file);
+    if (!file) return;
+    const err = isValidFile(file);
+    if (err) { onError?.(err); return; }
+    onFileSelect(file);
   }
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (file) handleFile(file);
-  }
-
-  function handleFile(file: File) {
-    // TODO: wire up to document processing pipeline
-    console.log("File selected:", file.name);
+    if (!file) return;
+    const err = isValidFile(file);
+    if (err) { onError?.(err); e.target.value = ""; return; }
+    onFileSelect(file);
   }
 
   return (
@@ -63,16 +84,16 @@ export default function DropZone() {
       />
 
       <div className="text-center space-y-1">
-        <p className="font-ui text-base text-secondary">
+        <p className="font-ui text-base text-secondary leading-[1.5]">
           Drag and drop your file here
         </p>
-        <p className="font-ui text-[14px] text-accent">
+        <p className="font-ui text-[14px] text-accent leading-[1.43]">
           or click to browse
         </p>
       </div>
 
-      <p className="font-ui text-[12px] text-muted">
-        Supports PDF and TXT up to 10MB
+      <p className="font-ui text-[12px] text-muted leading-[1.333]">
+        Supports PDF and TXT up to 4.5MB
       </p>
 
       <input
