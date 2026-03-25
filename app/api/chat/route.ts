@@ -49,7 +49,7 @@ Answer questions about this document clearly and in plain language. Be specific 
     const message = err instanceof Error ? err.message : String(err);
     console.error("Chat error:", message);
     return Response.json(
-      { error: "Failed to get a response. Please try again." },
+      { error: "Failed to get a response. Please try again.", detail: message },
       { status: 500 }
     );
   }
