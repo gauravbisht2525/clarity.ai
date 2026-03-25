@@ -105,8 +105,8 @@ export default function ResultsPage() {
       <div className="flex flex-col min-h-screen bg-background">
         <Header />
         <main className="flex-1 flex items-center justify-center">
-          <div className="w-10 h-10 rounded-full border-4 border-surface-elevated animate-spin"
-            style={{ borderTopColor: "var(--color-accent)" }} />
+          <div className="w-10 h-10 rounded-full border-4 border-border animate-spin"
+            style={{ borderTopColor: "var(--color-primary)" }} />
         </main>
       </div>
     );
@@ -184,7 +184,7 @@ export default function ResultsPage() {
                       "max-w-[80%] rounded-2xl px-4 py-3",
                       "font-ui text-[15px] leading-[1.6]",
                       msg.role === "user"
-                        ? "bg-accent text-white rounded-br-sm"
+                        ? "bg-surface-elevated border border-line text-primary rounded-br-sm"
                         : "bg-surface border border-border text-secondary rounded-bl-sm",
                     ].join(" ")}>
                       {msg.content}
@@ -216,7 +216,7 @@ export default function ResultsPage() {
         {/* ── Fixed input bar — always visible at the bottom ── */}
         <div className="shrink-0 bg-background border-t border-line px-4 sm:px-6 md:px-[60px] py-3 md:py-4">
           <div className="w-full max-w-[877px] mx-auto">
-            <div className="flex items-center gap-3 bg-surface border border-border rounded-xl px-4 py-3 focus-within:border-accent transition-colors duration-150">
+            <div className="flex items-center gap-3 bg-surface border border-border rounded-xl px-4 py-3 focus-within:border-muted transition-colors duration-150">
               <input
                 type="text"
                 value={chatInput}
@@ -232,7 +232,7 @@ export default function ResultsPage() {
                 className={[
                   "shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-colors duration-150",
                   chatInput.trim() && !chatLoading
-                    ? "bg-accent text-white hover:bg-accent-dark"
+                    ? "bg-surface-elevated text-primary hover:bg-line"
                     : "bg-surface-elevated text-muted cursor-not-allowed",
                 ].join(" ")}
               >
