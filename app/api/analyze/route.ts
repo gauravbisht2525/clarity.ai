@@ -148,7 +148,18 @@ export async function POST(req: Request) {
       const isPDF = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 
       if (isPDF) {
-        // Dynamically import pdf-parse (serverExternalPackages prevents module-init crash)
+        // pdf-parse uses pdfjs internally which references DOMMatrix (browser-only API).
+        // Polyfill it as a no-op class so the text extraction pipeline runs in Node.js.
+        if (typeof globalThis.DOMMatrix === "undefined") {
+          // @ts-ignore
+          globalThis.DOMMatrix = class DOMMatrix {
+            constructor() { Object.assign(this, { a:1,b:0,c:0,d:1,e:0,f:0,m11:1,m12:0,m13:0,m14:0,m21:0,m22:1,m23:0,m24:0,m31:0,m32:0,m33:1,m34:0,m41:0,m42:0,m43:0,m44:1 }); }
+            multiply() { return this; }
+            translate() { return this; }
+            scale() { return this; }
+            rotate() { return this; }
+          };
+        }
         // @ts-ignore
         const pdfParse = (await import("pdf-parse")).default;
         const parsed = await (pdfParse as (buf: Buffer) => Promise<{ text: string }>)(buffer);
