@@ -75,7 +75,7 @@ export default function ChatArea({ documentText }: ChatAreaProps) {
                   "max-w-[80%] rounded-2xl px-4 py-3",
                   "font-ui text-[15px] leading-[1.6]",
                   msg.role === "user"
-                    ? "bg-accent text-white rounded-br-sm"
+                    ? "bg-surface-elevated border border-line text-primary rounded-br-sm"
                     : "bg-surface border border-border text-secondary rounded-bl-sm",
                 ].join(" ")}
               >
@@ -114,7 +114,7 @@ export default function ChatArea({ documentText }: ChatAreaProps) {
       )}
 
       {/* Input row */}
-      <div className="flex items-center gap-3 bg-surface border border-border rounded-xl px-4 py-3 focus-within:border-secondary transition-colors duration-150">
+      <div className="flex items-center gap-3 bg-surface border border-border rounded-xl px-4 py-3 focus-within:border-line transition-colors duration-150">
         <input
           type="text"
           value={input}
@@ -129,7 +129,7 @@ export default function ChatArea({ documentText }: ChatAreaProps) {
           className={[
             "shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-colors duration-150",
             input.trim() && !loading
-              ? "bg-accent text-white hover:bg-accent-dark"
+              ? "bg-surface-elevated text-primary hover:bg-line"
               : "bg-surface-elevated text-muted cursor-not-allowed",
           ].join(" ")}
         >

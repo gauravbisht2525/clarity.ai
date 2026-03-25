@@ -42,7 +42,7 @@ export default function AnalyzingState() {
   });
 
   return (
-    <div className="flex flex-col items-center gap-8 w-full max-w-[420px]">
+    <div className="flex flex-col items-center gap-8 w-full max-w-[420px] mb-[12vh]">
       {/* Spinner */}
       <div
         className="w-12 h-12 rounded-full border-4 border-border animate-spin"
