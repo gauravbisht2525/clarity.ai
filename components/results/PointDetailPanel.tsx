@@ -28,14 +28,15 @@ interface PointDetailPanelProps {
 }
 
 export default function PointDetailPanel({ item, onClose }: PointDetailPanelProps) {
-  // Close on Escape
+  // Close on Escape — only active while panel is open
   useEffect(() => {
+    if (!item) return;
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
-  }, [onClose]);
+  }, [item, onClose]);
 
   return (
     <>

@@ -8,6 +8,7 @@ import DropZone from "@/components/upload/DropZone";
 import FileCard from "@/components/upload/FileCard";
 import PasteArea from "@/components/upload/PasteArea";
 import AnalyzingState from "@/components/states/AnalyzingState";
+import AnalyzeButton from "@/components/upload/AnalyzeButton";
 import type { DocumentAnalysis } from "@/types/analysis";
 
 type View = "upload" | "file-selected" | "paste" | "analyzing";
@@ -86,11 +87,11 @@ export default function HomePage() {
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
 
-      <main className="flex-1 flex flex-col items-center justify-center px-[60px] py-16 gap-10">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 md:px-[60px] py-8 md:py-16 gap-6 md:gap-10">
 
         {/* Hero */}
-        <div className="text-center flex flex-col items-center gap-6">
-          <h1 className="font-display text-[60px] font-normal leading-none tracking-[-0.025em] text-primary">
+        <div className="text-center flex flex-col items-center gap-4 md:gap-6">
+          <h1 className="font-display text-[32px] sm:text-[44px] md:text-[60px] font-normal leading-none tracking-[-0.025em] text-primary">
             Understand any document in seconds
           </h1>
           <p className="font-display text-base font-light leading-[1.625] text-secondary max-w-[500px]">
@@ -104,7 +105,7 @@ export default function HomePage() {
 
           {/* View: default upload dropzone */}
           {view === "upload" && (
-            <DropZone onFileSelect={handleFileSelect} />
+            <DropZone onFileSelect={handleFileSelect} onError={setError} />
           )}
 
           {/* View: file selected */}
@@ -177,28 +178,3 @@ export default function HomePage() {
   );
 }
 
-// ── Inline reusable button ────────────────────────────────
-function AnalyzeButton({
-  onClick,
-  disabled = false,
-}: {
-  onClick: () => void;
-  disabled?: boolean;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={[
-        "w-full rounded-xl py-3 px-6",
-        "font-ui text-base font-medium text-white leading-[1.5]",
-        "transition-colors duration-150",
-        disabled
-          ? "bg-surface-elevated text-muted cursor-not-allowed"
-          : "bg-accent hover:bg-accent-dark cursor-pointer",
-      ].join(" ")}
-    >
-      Analyze Document
-    </button>
-  );
-}

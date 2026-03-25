@@ -23,7 +23,7 @@ export default function ChatArea({ documentText }: ChatAreaProps) {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, loading]);
 
   async function sendMessage(text: string) {
     if (!text.trim() || loading) return;
@@ -64,7 +64,7 @@ export default function ChatArea({ documentText }: ChatAreaProps) {
 
       {/* Message thread — only shown once chat starts */}
       {messages.length > 0 && (
-        <div className="flex flex-col gap-3 max-h-[360px] overflow-y-auto pb-1">
+        <div className="flex flex-col gap-3 max-h-[240px] overflow-y-auto pb-1">
           {messages.map((msg, i) => (
             <div
               key={i}

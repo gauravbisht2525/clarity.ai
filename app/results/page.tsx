@@ -37,6 +37,55 @@ export default function ResultsPage() {
     router.push("/");
   }
 
+  function handleExport() {
+    if (!analysis) return;
+
+    const lines: string[] = [];
+
+    lines.push(`CLARITY.AI — DOCUMENT ANALYSIS`);
+    lines.push(`Document: ${analysis.fileName ?? "Untitled"}`);
+    lines.push(`Exported: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`);
+    lines.push("");
+    lines.push("═".repeat(60));
+    lines.push("");
+
+    lines.push("SUMMARY");
+    lines.push("─".repeat(40));
+    lines.push(analysis.summary);
+    lines.push("");
+
+    lines.push("KEY POINTS");
+    lines.push("─".repeat(40));
+    analysis.keyPoints.forEach((kp, i) => {
+      lines.push(`${i + 1}. ${kp.title}`);
+      lines.push(`   ${kp.detail}`);
+      lines.push("");
+    });
+
+    lines.push("RISKS & RED FLAGS");
+    lines.push("─".repeat(40));
+    analysis.risks.forEach((r, i) => {
+      lines.push(`${i + 1}. [${r.severity.toUpperCase()}] ${r.title}`);
+      lines.push(`   ${r.body}`);
+      lines.push("");
+    });
+
+    lines.push("WHAT YOU SHOULD DO");
+    lines.push("─".repeat(40));
+    analysis.actions.forEach((a, i) => {
+      lines.push(`${i + 1}. ${a.text}`);
+    });
+    lines.push("");
+
+    const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${(analysis.fileName ?? "analysis").replace(/\.[^.]+$/, "")}-clarity.txt`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+  }
+
   if (!analysis) {
     return (
       <div className="flex flex-col min-h-screen bg-background">
@@ -53,11 +102,12 @@ export default function ResultsPage() {
 
   return (
     <>
-      <div className="flex flex-col min-h-screen bg-background">
-        <Header fileName={analysis.fileName} onUploadNew={handleUploadNew} />
+      <div className="h-screen flex flex-col bg-background overflow-hidden">
+        <Header fileName={analysis.fileName} onUploadNew={handleUploadNew} onExport={handleExport} />
 
-        <main className="flex-1 flex flex-col items-center px-[60px] py-8 gap-4">
-          <div className="w-full max-w-[877px] flex flex-col gap-4">
+        {/* Scrollable section cards */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-[60px] py-4 md:py-8">
+          <div className="w-full max-w-[877px] mx-auto flex flex-col gap-4">
 
             {/* Summary */}
             <SectionCard
@@ -113,17 +163,16 @@ export default function ResultsPage() {
               </div>
             </SectionCard>
 
-            {/* Divider */}
-            <div className="h-px bg-divider" />
-
-            {/* Chat area */}
-            <ChatArea documentText={analysis.documentText} />
-
-            {/* Bottom padding */}
-            <div className="h-8" />
-
           </div>
-        </main>
+        </div>
+
+        {/* Fixed chat bar at bottom */}
+        <div className="shrink-0 bg-background border-t border-line px-4 sm:px-6 md:px-[60px] py-3 md:py-4">
+          <div className="w-full max-w-[877px] mx-auto">
+            <ChatArea documentText={analysis.documentText} />
+          </div>
+        </div>
+
       </div>
 
       {/* Point detail panel (slide-in overlay) */}
