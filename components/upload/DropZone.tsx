@@ -4,7 +4,11 @@ import { useRef, useState } from "react";
 import type { DragEvent, ChangeEvent } from "react";
 import { CloudUpload } from "lucide-react";
 
-export default function DropZone() {
+interface DropZoneProps {
+  onFileSelect: (file: File) => void;
+}
+
+export default function DropZone({ onFileSelect }: DropZoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -22,17 +26,12 @@ export default function DropZone() {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files?.[0];
-    if (file) handleFile(file);
+    if (file) onFileSelect(file);
   }
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (file) handleFile(file);
-  }
-
-  function handleFile(file: File) {
-    // TODO: wire up to document processing pipeline
-    console.log("File selected:", file.name);
+    if (file) onFileSelect(file);
   }
 
   return (
@@ -63,15 +62,15 @@ export default function DropZone() {
       />
 
       <div className="text-center space-y-1">
-        <p className="font-ui text-base text-secondary">
+        <p className="font-ui text-base text-secondary leading-[1.5]">
           Drag and drop your file here
         </p>
-        <p className="font-ui text-[14px] text-accent">
+        <p className="font-ui text-[14px] text-accent leading-[1.43]">
           or click to browse
         </p>
       </div>
 
-      <p className="font-ui text-[12px] text-muted">
+      <p className="font-ui text-[12px] text-muted leading-[1.333]">
         Supports PDF and TXT up to 10MB
       </p>
 
