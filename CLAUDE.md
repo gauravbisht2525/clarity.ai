@@ -116,81 +116,307 @@ AI Layer (@anthropic-ai/sdk)
 - Users ask follow-up questions
 - Users complete the decision flow
 
+---
+
 ## Design System / Style Guide
+
+> This is the single source of truth for all visual decisions. Extracted directly from Figma.
+> Every component must follow this guide exactly — no approximations.
+
+---
 
 ### Colors
 
-| Token | Tailwind Class | Value | Usage |
+Defined in `app/globals.css` under `@theme`. Always use Tailwind utility classes — never hardcode hex values in components.
+
+| Token | Tailwind Class | Hex | Usage |
 |---|---|---|---|
-| `--color-background` | `bg-background` | `#0F0F0F` | Page background |
-| `--color-surface` | `bg-surface` | `#1A1A1A` | Cards, upload area |
-| `--color-border` | `border-border` / `bg-border` | `#2E2E2E` | Dashed borders, dividers |
-| `--color-primary` | `text-primary` | `#FFFFFF` | Headings, primary text |
-| `--color-secondary` | `text-secondary` | `#8A8A8A` | Subtext, helper text, labels |
-| `--color-muted` | `text-muted` | `#555555` | Italicized notes (e.g. "never stored") |
-| `--color-accent` | `text-accent` / `bg-accent` | `#E8613A` | Logo, CTAs, links, highlights |
-| `--color-accent-dark` | `text-accent-dark` | `#D04E2A` | Hover state for accent elements |
+| `--color-background` | `bg-background` | `#1A1A1A` | Page background (all frames) |
+| `--color-surface` | `bg-surface` | `#1E1E1E` | Cards, panels, upload zone |
+| `--color-surface-elevated` | `bg-surface-elevated` | `#2A2A2A` | Icon containers, secondary buttons, hover states |
+| `--color-border` | `border-border` / `bg-border` | `#3A3A3A` | Card borders, input borders |
+| `--color-divider` | `bg-divider` | `#2E2E2E` | Horizontal divider lines |
+| `--color-line` | `bg-line` | `#3F3F3F` | Header bottom line, subtle separators |
+| `--color-primary` | `text-primary` | `#ECECEC` | Headings, high-emphasis text |
+| `--color-secondary` | `text-secondary` | `#A3A3A3` | Body text, labels, subtext |
+| `--color-muted` | `text-muted` | `#737373` | Hints, support notes, placeholders |
+| `--color-white` | `text-white` | `#FFFFFF` | Logo, primary button text |
+| `--color-accent` | `text-accent` / `bg-accent` | `#DA5B0A` | CTAs, links, primary buttons, active states |
+| `--color-success` | `text-success` | `#4ADE80` | Bullet points, "Analyzed" badge text, positive indicators |
+| `--color-success-bg` | `bg-success-bg` | `#1E3A2A` | "Analyzed" badge background |
+
+**Usage rules:**
+- Accent (`#DA5B0A`) is only used for interactive elements — primary buttons, CTA links, drag-active states
+- Primary text (`#ECECEC`) is warm near-white — do NOT use pure `#FFFFFF` for body text
+- White (`#FFFFFF`) is reserved for logo and text on filled accent/dark buttons only
+- Success green is used for bullet points on key items and status badges — never decoratively
+
+---
 
 ### Typography
 
-- **Font Family**: `Helvetica Neue, Helvetica, Arial, sans-serif`
-- **Rendering**: Clean, no decorative fonts — system-level sans-serif feel
+**Two font families are used — do not mix them up:**
 
-| Role | Size | Weight | Color |
-|---|---|---|---|
-| Hero Heading | `56px` | `400` (Regular) | `--color-text-primary` |
-| Subheading / Body | `16px` | `400` | `--color-text-secondary` |
-| Upload Label | `15px` | `400` | `--color-text-secondary` |
-| CTA Link (browse) | `15px` | `400` | `--color-accent` |
-| Small / Note | `13px` | `400` italic | `--color-text-muted` |
-| Logo | `16px` | `500` | `--color-accent` |
-
-### Border Radius
-
-| Element | Radius |
+| Font | Usage |
 |---|---|
-| Upload card | `16px` |
-| Buttons | `8px` |
-| Input fields | `8px` |
-| Tags / Badges | `4px` |
+| **Helvetica** (system) | Display: logo, hero heading, section headings, paragraph text in hero |
+| **Inter** | UI: labels, buttons, body copy inside cards, input fields, badges |
+
+Apply both via `@theme` in `globals.css`:
+```css
+--font-display: Helvetica, Arial, sans-serif;
+--font-ui: "Inter", system-ui, sans-serif;
+```
+
+#### Type Scale (from Figma — exact values)
+
+| Role | Font | Size | Weight | Line Height | Letter Spacing | Color Token | Usage |
+|---|---|---|---|---|---|---|---|
+| Logo | Helvetica | `24px` | `300` | `1.333` | — | `text-white` | Header wordmark |
+| Hero Heading | Helvetica | `60px` | `400` | `1` | `-2.5%` | `text-primary` | Main page title |
+| Subheading | Helvetica | `16px` | `300` | `1.625` | — | `text-secondary` | Hero descriptor, trust signal |
+| Section Heading | Helvetica | `20px` | `400` | `1.5` | — | `text-primary` | Card section titles (Summary, Key Points, etc.) |
+| Upload Label | Inter | `16px` | `400` | `1.5` | — | `text-secondary` | "Drag and drop your file here" |
+| CTA / Link | Inter | `14px` | `400` | `1.43` | — | `text-accent` | "or click to browse", "Paste your text instead" |
+| Support Note | Inter | `12px` | `400` | `1.333` | — | `text-muted` | "Supports PDF and TXT up to 10MB" |
+| Divider Label | Inter | `14px` | `500` | `1.43` | — | `text-muted` | "or" |
+| Body / List | Inter | `15px` | `400` | `1.6` | — | `text-secondary` | Card content, list items |
+| Risk Title | Inter | `15px` | `500` | `1.5` | — | `text-primary` | Bold label in risk cards |
+| Risk Body | Inter | `14px` | `400` | `1.43` | — | `text-muted` | Descriptive text under risk title |
+| Button | Inter | `16px` | `500` | `1.5` | — | `text-white` | Primary CTA buttons |
+| Input Placeholder | Inter | `15px` | `400` | `1.21` | — | `text-muted` | Text input, chat placeholder |
+| File Name | Inter | `16px` | `500` | `1.5` | — | `text-primary` | Uploaded file name |
+| File Meta | Inter | `14px` | `400` | `1.5` | — | `text-muted` | File size, metadata |
+| Badge | Inter | `12px` | `400` | `1.5` | — | `text-success` | "Analyzed" status badge |
+
+---
 
 ### Spacing Scale
 
-Uses an `8px` base grid via **Tailwind's default spacing scale** (4px base unit).
+Uses **Tailwind's default 4px base unit** — 8px grid at even steps.
 
-> ⚠️ Do NOT define `--spacing-N` tokens in `@theme` — they override Tailwind's utility scale and break icon/component sizing.
+> ⚠️ Do NOT define `--spacing-N` tokens in `@theme` — they override Tailwind's utility scale and break icon and component sizing throughout the app.
 
-| Design Value | Tailwind Utility | Usage |
+| Value | Tailwind Utility | Use case |
 |---|---|---|
-| `8px` | `*-2` (e.g. `gap-2`, `p-2`) | Tight inner padding |
-| `16px` | `*-4` | Component padding |
-| `24px` | `*-6` | Section gaps |
-| `32px` | `*-8` | Card padding |
+| `4px` | `*-1` | Icon inner gaps, micro spacing |
+| `8px` | `*-2` | Tight gaps between inline elements |
+| `12px` | `*-3` | Small gaps (icon to label) |
+| `16px` | `*-4` | Component inner padding |
+| `20px` | `*-5` | Medium gaps |
+| `24px` | `*-6` | Section gaps, card inner spacing |
+| `32px` | `*-8` | Card padding, large component gaps |
+| `40px` | `*-10` | Between hero and upload card |
 | `48px` | `*-12` | Large section spacing |
-| `64px` | `*-16` | Hero vertical padding |
+| `64px` | `*-16` | Hero top/bottom padding |
 
-### Borders
+---
 
-- Upload card: `1.5px dashed #2E2E2E`
-- Divider line: `1px solid #2E2E2E`
+### Border Radius
+
+| Element | Value | Tailwind |
+|---|---|---|
+| Cards (upload, panels, summary sections) | `16px` | `rounded-2xl` |
+| Primary buttons | `12px` | `rounded-xl` |
+| Secondary buttons / tags | `10px` | `rounded-[10px]` |
+| Input fields | `12px` | `rounded-xl` |
+| Icon containers | `10px` | `rounded-[10px]` |
+| Badges / Pills | `4px` | `rounded` |
+| Circular / full-pill | `999px` | `rounded-full` |
+
+---
+
+### Borders & Strokes
+
+| Element | Style |
+|---|---|
+| Upload zone card | `1px dashed #3A3A3A` (dash pattern: 3px dash, 2px gap) |
+| Result section cards | `1px solid #3A3A3A` |
+| Input fields (default) | `1px solid #3A3A3A` |
+| Input fields (focus) | `2px solid #DA5B0A` |
+| Header separator | `0.5px solid #3F3F3F` |
+| Horizontal dividers | `1px solid #2E2E2E` |
+| Loading spinner | `4px solid #DA5B0A` |
+
+---
 
 ### Shadows
 
-- Minimal — dark theme avoids heavy box shadows
-- Subtle glow on accent elements if needed: `0 0 12px rgba(232, 97, 58, 0.15)`
+- Dark theme avoids all box-shadows — use borders for separation
+- No `drop-shadow` or `box-shadow` on any card or panel
+- Accent glow (use sparingly on interactive focus): `0 0 0 2px rgba(218, 91, 10, 0.3)`
+
+---
 
 ### Icons
 
-- Style: Outlined, lightweight stroke
-- Size: `24px` default, `32px` for feature icons
-- Color: `--color-text-secondary`
+- **Library:** `lucide-react` only
+- **Style:** Outlined, `strokeWidth={1.5}` always
+- **Sizes:**
+  - Inline / UI icons: `w-4 h-4` (16px)
+  - Button icons: `w-5 h-5` (20px)
+  - Feature / hero icons: `w-8 h-8` (32px)
+- **Default color:** `text-secondary`; `text-accent` on hover/active; `text-primary` on selected
+
+---
+
+### Component Specs
+
+#### Header
+- Height: `~96px` (logo at `y:40`, separator line at `y:98` on 1440px canvas)
+- Background: transparent (inherits `bg-background`)
+- Border bottom: `0.5px solid` `#3F3F3F` (`border-line`)
+- Inner container: `max-w-[1320px] mx-auto px-[60px]` — flex row, items center
+- Logo: `"Clarity.ai"`, Helvetica `24px` weight `300`, color `text-white`
+- No navigation links in MVP
+
+#### Hero Section
+- Canvas position: heading at `y:226` on 1024px tall frame
+- Text alignment: `text-center`
+- Heading: Helvetica `60px` weight `400` `leading-none tracking-[-0.025em]` `text-primary`
+- Subtext container: `500px` wide, centered
+- Subtext: Helvetica `16px` weight `300` `leading-[1.625]` `text-secondary`
+- Vertical gap between heading and subtext: `gap-6` (24px) — based on `y:226` heading to `y:310` container
+
+#### Upload Card (DropZone)
+- Canvas: `877px` wide × `220px` tall, centered on 1440px canvas (margins ~282px each side)
+- Tailwind: `w-full max-w-[877px]`
+- Background: `bg-surface` (`#1E1E1E`)
+- Border: `border border-dashed border-border` (1px dashed `#3A3A3A`)
+- Border radius: `rounded-2xl` (16px)
+- Padding: `px-8 py-10` (matches 220px height)
+- Inner layout: `flex flex-col items-center gap-3`
+- Hover state: `hover:border-accent/50` border
+- Drag-active state: `border-accent` + icon `text-accent`
+- Transition: `transition-colors duration-150`
+- Icon: `CloudUpload`, `w-8 h-8 text-secondary`, `strokeWidth={1.5}`
+- Upload label: Inter `16px` `400` `text-secondary` — "Drag and drop your file here"
+- CTA link: Inter `14px` `400` `text-accent` — "or click to browse"
+- Support note: Inter `12px` `400` `text-muted` — "Supports PDF and TXT up to 10MB"
+- Label group spacing: `space-y-1`
+
+#### Uploaded File Card (post-selection state)
+- Same container as DropZone, replaces content
+- Shows: file icon (in `bg-surface-elevated` `rounded-[10px]` container) + filename + file size
+- Remove/clear button: X icon on the right
+- "Analyze Document" CTA button below the file card
+- Button: `w-full bg-accent text-white rounded-xl py-3` Inter `500` `16px`
+
+#### Or Divider
+- Full width of upload section
+- Layout: `flex items-center gap-4`
+- Lines: `flex-1 h-px bg-divider`
+- Text: Inter `14px` `500` `text-muted`
+
+#### Paste Toggle
+- Layout: `flex items-center gap-2`
+- Font: Inter `14px` `400` `text-secondary`
+- Hover: `hover:text-primary`
+- Icon: `Clipboard`, `w-4 h-4 strokeWidth={1.5}`
+- Transition: `transition-colors duration-150`
+
+#### Trust Signal
+- Text: `"Your document is never stored"`
+- Style: Helvetica `16px` weight `300` `leading-[1.625]` `text-secondary`
+- Position: bottom of page, centered — canvas `y:886`
+
+#### Text Area (Paste mode)
+- Background: `bg-surface` (`#1E1E1E`)
+- Border: `1px solid #3A3A3A`
+- Border radius: `rounded-2xl` (16px)
+- Placeholder: Inter `16px` `400` `text-muted` — "Paste your document text here..."
+- Full width of upload section
+- Height: tall enough for comfortable reading (~240px min)
+
+#### Primary Button ("Analyze Document")
+- Background: `bg-accent` (`#DA5B0A`)
+- Text: Inter `500` `16px` `text-white`
+- Border radius: `rounded-xl` (12px)
+- Padding: `py-3 px-6`
+- Hover: `hover:bg-accent-dark`
+- Full width: `w-full`
+
+#### Section Cards (Results page)
+- Background: `bg-surface` (`#1E1E1E`)
+- Border: `1px solid #3A3A3A`
+- Border radius: `rounded-2xl` (16px)
+- Icon header: `bg-surface-elevated` `rounded-[10px]` icon container + section title Helvetica `20px` `400`
+- Body: Inter `15px` `400` `text-secondary`
+
+#### Analyzing / Loading State
+- Centered layout
+- Title: Helvetica `20px` `400` `text-primary` — "Analyzing your document..."
+- Subtitle: Inter `14px` `400` `text-muted` — "This will just take a moment"
+- Spinner: circular, `4px solid #DA5B0A` accent stroke
+
+#### Chat Input (Results page)
+- Background: `bg-surface`
+- Border: `1px solid #3A3A3A`
+- Border radius: `rounded-xl` (12px)
+- Placeholder: Inter `15px` `400` `text-muted`
+- Send button: square, `bg-surface-elevated` `rounded-xl`
+
+#### Quick-action Chips (Results page)
+- Background: `bg-surface`
+- Border: `1px solid #3A3A3A`
+- Border radius: `rounded-[10px]`
+- Text: Inter `14px` `400` `text-secondary`
+- Examples: "Explain this simply", "Is this safe to proceed?", "What should I negotiate?", "What are my obligations?"
+
+#### Status Badge ("Analyzed")
+- Background: `bg-success-bg` (`#1E3A2A`)
+- Text: Inter `12px` `400` `text-success` (`#4ADE80`)
+- Border radius: `rounded` (4px)
+- Padding: `px-2 py-0.5`
+
+---
+
+### Page Layout
+
+#### Landing Page (`/`) — 1440×1024 canvas
+
+```
+<div> bg-background, min-h-screen, flex flex-col
+  <Header />                          ← ~96px tall, logo at 40px from top
+  <main> flex-1, flex flex-col, items-center, justify-center, px-[60px], gap-10
+    <hero> text-center, flex flex-col, gap-6
+      <h1>                            ← Helvetica 60px 400, tracking-[-0.025em]
+      <p>                             ← Helvetica 16px 300, max-w-[500px]
+    <upload-section> w-full, max-w-[877px], flex flex-col, gap-6
+      <DropZone />                    ← 877px wide, 220px tall
+      <or-divider>
+      <PasteToggle />
+    <trust-signal>                    ← Helvetica 16px 300, centered
+```
+
+#### Document Summary Page (`/results`)
+
+```
+<div> bg-background, min-h-screen, flex flex-col
+  <Header />
+    + file name + "Analyzed" badge (right side of header)
+    + "Upload New" + "Export" buttons
+  <main> flex-1, flex flex-col, items-center, px-[60px], py-8, gap-6
+    <sections-grid> w-full, max-w-[877px], flex flex-col, gap-4
+      <Section card> Summary
+      <Section card> Key Points
+      <Section card> Risks & Red Flags
+    <chat-area> w-full, max-w-[877px]
+      <quick-chips>
+      <input>
+```
+
+---
 
 ### Design Principles
 
-- Dark-first UI — all components designed for dark background
-- Accent color used sparingly — only for interactive/CTA elements
-- No decorative elements — clean, minimal, functional
-- Trust-focused — privacy messages, no clutter
+1. **Dark-first** — every component designed for dark backgrounds. No light mode.
+2. **Two-font system** — Helvetica for display/headings, Inter for UI. Never swap them.
+3. **Warm palette** — primary text is `#ECECEC` (warm near-white), NOT pure white. Cards are `#1E1E1E`, not pure black.
+4. **Accent is earned** — `#DA5B0A` only on interactive elements (buttons, links, active drag). Never decorative.
+5. **No decoration** — no gradients, no blurs, no decorative shapes. Clean, functional.
+6. **Breathing room** — generous spacing. Whitespace is intentional.
+7. **Trust signals** — "Your document is never stored" is always visible near the upload area.
 
 ---
 
@@ -206,6 +432,6 @@ npm run dev
 # Build for production
 npm run build
 
-# Run tests
-npm test
+# Type check
+npx tsc --noEmit
 ```

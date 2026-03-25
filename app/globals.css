@@ -1,29 +1,44 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Brand colors ───────────────────────────────── */
-  --color-background: #0f0f0f;
-  --color-surface:    #1a1a1a;
-  --color-border:     #2e2e2e;
-  --color-accent:     #e8613a;
-  --color-accent-dark: #d04e2a;
+  /* ── Backgrounds ────────────────────────────────── */
+  --color-background:        #1a1a1a;  /* page background */
+  --color-surface:           #1e1e1e;  /* cards, panels, upload zone */
+  --color-surface-elevated:  #2a2a2a;  /* icon containers, secondary buttons */
+
+  /* ── Borders ────────────────────────────────────── */
+  --color-border:   #3a3a3a;  /* card borders, input borders */
+  --color-divider:  #2e2e2e;  /* horizontal divider lines */
+  --color-line:     #3f3f3f;  /* header separator, subtle lines */
 
   /* ── Text hierarchy ─────────────────────────────── */
-  --color-primary:   #ffffff;
-  --color-secondary: #8a8a8a;
-  --color-muted:     #555555;
+  --color-primary:   #ececec;  /* headings, high-emphasis text */
+  --color-secondary: #a3a3a3;  /* body text, labels, subtext */
+  --color-muted:     #737373;  /* hints, support notes, placeholders */
+  --color-white:     #ffffff;  /* logo, button text on filled backgrounds */
+
+  /* ── Accent ─────────────────────────────────────── */
+  --color-accent:      #da5b0a;  /* CTAs, links, primary buttons */
+  --color-accent-dark: #c24f09;  /* hover state on accent elements */
+
+  /* ── Success ────────────────────────────────────── */
+  --color-success:    #4ade80;  /* bullet points, "Analyzed" badge text */
+  --color-success-bg: #1e3a2a;  /* "Analyzed" badge background */
 
   /* ── Typography ─────────────────────────────────── */
-  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
-
+  --font-display: Helvetica, Arial, sans-serif;                              /* headings, logo */
+  --font-ui:      var(--loaded-inter), "Inter", system-ui, sans-serif;       /* labels, buttons, body in cards */
 }
 
 /*
   ── Spacing reference (8px grid, Tailwind default scale) ──
-  8px  → *-2   (gap-2, p-2, etc.)
+  4px  → *-1
+  8px  → *-2
+  12px → *-3
   16px → *-4
   24px → *-6
   32px → *-8
+  40px → *-10
   48px → *-12
   64px → *-16
 */
@@ -43,7 +58,7 @@ body {
   min-height: 100%;
   background-color: var(--color-background);
   color: var(--color-primary);
-  font-family: var(--font-sans);
+  font-family: var(--font-display);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
