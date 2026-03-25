@@ -1,6 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { ChatMessage } from "@/types/analysis";
 
+// Vercel Hobby allows up to 60s
+export const maxDuration = 60;
+
 const client = new Anthropic();
 
 export async function POST(req: Request) {

@@ -1,5 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { DocumentAnalysis } from "@/types/analysis";
+
+// Vercel Hobby allows up to 60s — Claude analysis needs it
+export const maxDuration = 60;
+
 // NOTE: pdf-parse is NOT imported at module level.
 // The top-level import triggers a filesystem test-fixture check that crashes
 // Vercel serverless functions. Instead we dynamically import the inner lib
@@ -195,9 +199,10 @@ export async function POST(req: Request) {
 
     return Response.json(analysis);
   } catch (err) {
-    console.error("Analyze error:", err);
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("Analyze error:", message);
     return Response.json(
-      { error: "Failed to analyze document. Please try again." },
+      { error: "Failed to analyze document. Please try again.", detail: message },
       { status: 500 }
     );
   }
