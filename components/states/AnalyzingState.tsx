@@ -45,8 +45,8 @@ export default function AnalyzingState() {
     <div className="flex flex-col items-center gap-8 w-full max-w-[420px]">
       {/* Spinner */}
       <div
-        className="w-12 h-12 rounded-full border-4 border-surface-elevated animate-spin"
-        style={{ borderTopColor: "var(--color-accent)" }}
+        className="w-12 h-12 rounded-full border-4 border-border animate-spin"
+        style={{ borderTopColor: "var(--color-primary)" }}
       />
 
       {/* Copy */}
@@ -66,7 +66,7 @@ export default function AnalyzingState() {
             className="h-full rounded-full transition-all duration-300 ease-out"
             style={{
               width: `${progress}%`,
-              backgroundColor: "var(--color-accent)",
+              backgroundColor: "var(--color-secondary)",
             }}
           />
         </div>

@@ -114,7 +114,7 @@ export default function ChatArea({ documentText }: ChatAreaProps) {
       )}
 
       {/* Input row */}
-      <div className="flex items-center gap-3 bg-surface border border-border rounded-xl px-4 py-3 focus-within:border-accent transition-colors duration-150">
+      <div className="flex items-center gap-3 bg-surface border border-border rounded-xl px-4 py-3 focus-within:border-secondary transition-colors duration-150">
         <input
           type="text"
           value={input}
