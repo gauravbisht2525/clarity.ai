@@ -1,7 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { DocumentAnalysis } from "@/types/analysis";
 
-// Vercel Hobby allows up to 60s — Claude analysis needs it
+// Vercel Hobby allows up to 60s
 export const maxDuration = 60;
 
 // NOTE: pdf-parse is NOT imported at module level.
@@ -9,7 +9,7 @@ export const maxDuration = 60;
 // Vercel serverless functions. Instead we dynamically import the inner lib
 // (pdf-parse/lib/pdf-parse.js) only when a PDF is actually being processed.
 
-const client = new Anthropic();
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? "");
 
 const SYSTEM_PROMPT = `You are a document analysis assistant. Analyze the provided document and return a JSON object with exactly this structure:
 
@@ -72,29 +72,25 @@ const MOCK_ANALYSIS: Omit<DocumentAnalysis, "documentText" | "fileName"> = {
     {
       id: "r1",
       title: "Overly broad IP assignment clause",
-      body:
-        "The IP assignment covers work done outside company hours if it is 'related to the company's business.' This is vague and could claim ownership over personal projects. You should negotiate a carve-out for pre-existing work and personal projects.",
+      body: "The IP assignment covers work done outside company hours if it is 'related to the company's business.' This is vague and could claim ownership over personal projects. You should negotiate a carve-out for pre-existing work and personal projects.",
       severity: "high",
     },
     {
       id: "r2",
       title: "Non-compete may limit future employment",
-      body:
-        "A 12-month non-compete in your industry is significant. Depending on your state, it may or may not be enforceable, but it could deter future employers. Consider negotiating the scope or duration.",
+      body: "A 12-month non-compete in your industry is significant. Depending on your state, it may or may not be enforceable, but it could deter future employers. Consider negotiating the scope or duration.",
       severity: "high",
     },
     {
       id: "r3",
       title: "Bonus is fully discretionary",
-      body:
-        "The agreement mentions a bonus but explicitly states it is not guaranteed and can be changed or removed at any time. Do not factor this into your financial planning.",
+      body: "The agreement mentions a bonus but explicitly states it is not guaranteed and can be changed or removed at any time. Do not factor this into your financial planning.",
       severity: "medium",
     },
     {
       id: "r4",
       title: "Arbitration clause waives jury trial rights",
-      body:
-        "Any disputes must go through private arbitration rather than court. This limits your ability to sue publicly and may favour the company in disputes.",
+      body: "Any disputes must go through private arbitration rather than court. This limits your ability to sue publicly and may favour the company in disputes.",
       severity: "medium",
     },
   ],
@@ -123,9 +119,9 @@ const MOCK_ANALYSIS: Omit<DocumentAnalysis, "documentText" | "fileName"> = {
 };
 
 export async function POST(req: Request) {
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.GEMINI_API_KEY) {
     return Response.json(
-      { error: "ANTHROPIC_API_KEY is not configured" },
+      { error: "GEMINI_API_KEY is not configured" },
       { status: 500 }
     );
   }
@@ -138,8 +134,12 @@ export async function POST(req: Request) {
 
     // ── Mock mode ──────────────────────────────────────────
     if (process.env.MOCK_ANALYSIS === "true") {
-      await new Promise((r) => setTimeout(r, 3000)); // simulate AI latency
-      return Response.json({ ...MOCK_ANALYSIS, documentText: text ?? "Mock document content.", fileName });
+      await new Promise((r) => setTimeout(r, 3000));
+      return Response.json({
+        ...MOCK_ANALYSIS,
+        documentText: text ?? "Mock document content.",
+        fileName,
+      });
     }
 
     let documentText = text || "";
@@ -164,23 +164,19 @@ export async function POST(req: Request) {
       return Response.json({ error: "No document content found" }, { status: 400 });
     }
 
-    // Truncate to ~12k tokens to stay within context limits
+    // Truncate to stay within context limits (~12k tokens)
     const truncated = documentText.slice(0, 48000);
 
-    const message = await client.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 2048,
-      system: SYSTEM_PROMPT,
-      messages: [
-        {
-          role: "user",
-          content: `Analyze this document:\n\n${truncated}`,
-        },
-      ],
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: SYSTEM_PROMPT,
     });
 
-    const raw =
-      message.content[0].type === "text" ? message.content[0].text : "";
+    const result = await model.generateContent(
+      `Analyze this document:\n\n${truncated}`
+    );
+
+    const raw = result.response.text();
 
     let parsed: Omit<DocumentAnalysis, "documentText" | "fileName">;
     try {

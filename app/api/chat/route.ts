@@ -1,15 +1,15 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { ChatMessage } from "@/types/analysis";
 
 // Vercel Hobby allows up to 60s
 export const maxDuration = 60;
 
-const client = new Anthropic();
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? "");
 
 export async function POST(req: Request) {
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.GEMINI_API_KEY) {
     return Response.json(
-      { error: "ANTHROPIC_API_KEY is not configured" },
+      { error: "GEMINI_API_KEY is not configured" },
       { status: 500 }
     );
   }
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       history: ChatMessage[];
     };
 
-    const systemPrompt = `You are a document assistant helping a user understand a specific document they uploaded.
+    const systemInstruction = `You are a document assistant helping a user understand a specific document they uploaded.
 
 Here is the document content:
 ---
@@ -30,27 +30,25 @@ ${documentText.slice(0, 32000)}
 
 Answer questions about this document clearly and in plain language. Be specific — reference the actual document content when relevant. Keep answers concise (2-4 sentences unless more detail is needed). If something is not covered in the document, say so clearly.`;
 
-    const messages = [
-      ...history.map((m) => ({
-        role: m.role as "user" | "assistant",
-        content: m.content,
-      })),
-      { role: "user" as const, content: message },
-    ];
-
-    const response = await client.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages,
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction,
     });
 
-    const reply =
-      response.content[0].type === "text" ? response.content[0].text : "";
+    // Map history to Gemini format
+    const chatHistory = history.map((m) => ({
+      role: m.role === "user" ? "user" : "model",
+      parts: [{ text: m.content }],
+    }));
+
+    const chat = model.startChat({ history: chatHistory });
+    const result = await chat.sendMessage(message);
+    const reply = result.response.text();
 
     return Response.json({ reply });
   } catch (err) {
-    console.error("Chat error:", err);
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("Chat error:", message);
     return Response.json(
       { error: "Failed to get a response. Please try again." },
       { status: 500 }
