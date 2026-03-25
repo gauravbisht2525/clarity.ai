@@ -1,8 +1,8 @@
 export default function Header() {
   return (
-    <header className="w-full border-b border-border">
-      <div className="max-w-6xl mx-auto px-6 h-14 flex items-center">
-        <span className="text-base font-medium text-accent tracking-tight">
+    <header className="w-full border-b border-line">
+      <div className="max-w-[1320px] mx-auto px-[60px] h-24 flex items-center">
+        <span className="font-display text-2xl font-light text-white tracking-tight">
           Clarity.ai
         </span>
       </div>

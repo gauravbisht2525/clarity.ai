@@ -47,12 +47,12 @@ export default function DropZone() {
       onDrop={handleDrop}
       className={[
         "w-full rounded-2xl border border-dashed bg-surface",
-        "px-8 py-16 flex flex-col items-center gap-4",
+        "px-8 py-10 flex flex-col items-center gap-3",
         "cursor-pointer select-none",
         "transition-colors duration-150",
         isDragging
           ? "border-accent"
-          : "border-border hover:border-secondary",
+          : "border-border hover:border-accent/50",
       ].join(" ")}
     >
       <CloudUpload
@@ -63,11 +63,17 @@ export default function DropZone() {
       />
 
       <div className="text-center space-y-1">
-        <p className="text-sm text-secondary">Drag and drop your file here</p>
-        <p className="text-sm text-accent">or click to browse</p>
+        <p className="font-ui text-base text-secondary">
+          Drag and drop your file here
+        </p>
+        <p className="font-ui text-[14px] text-accent">
+          or click to browse
+        </p>
       </div>
 
-      <p className="text-xs text-muted">Supports PDF and TXT up to 10MB</p>
+      <p className="font-ui text-[12px] text-muted">
+        Supports PDF and TXT up to 10MB
+      </p>
 
       <input
         ref={inputRef}
