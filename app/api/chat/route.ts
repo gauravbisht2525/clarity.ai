@@ -4,12 +4,16 @@ import type { ChatMessage } from "@/types/analysis";
 // Vercel Hobby allows up to 60s
 export const maxDuration = 60;
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// Groq is OpenAI-compatible — same SDK, different base URL + model
+const client = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: "https://api.groq.com/openai/v1",
+});
 
 export async function POST(req: Request) {
-  if (!process.env.OPENAI_API_KEY) {
+  if (!process.env.GROQ_API_KEY) {
     return Response.json(
-      { error: "OPENAI_API_KEY is not configured" },
+      { error: "GROQ_API_KEY is not configured" },
       { status: 500 }
     );
   }
@@ -31,7 +35,7 @@ ${documentText.slice(0, 32000)}
 Answer questions about this document clearly and in plain language. Be specific — reference the actual document content when relevant. Keep answers concise (2-4 sentences unless more detail is needed). If something is not covered in the document, say so clearly.`;
 
     const response = await client.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "llama-3.3-70b-versatile",
       max_tokens: 1024,
       messages: [
         { role: "system", content: systemPrompt },

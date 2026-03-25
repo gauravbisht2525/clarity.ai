@@ -4,7 +4,11 @@ import type { DocumentAnalysis } from "@/types/analysis";
 // Vercel Hobby allows up to 60s
 export const maxDuration = 60;
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// Groq is OpenAI-compatible — same SDK, different base URL + model
+const client = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: "https://api.groq.com/openai/v1",
+});
 
 const SYSTEM_PROMPT = `You are a document analysis assistant. Analyze the provided document and return a JSON object with exactly this structure:
 
@@ -114,9 +118,9 @@ const MOCK_ANALYSIS: Omit<DocumentAnalysis, "documentText" | "fileName"> = {
 };
 
 export async function POST(req: Request) {
-  if (!process.env.OPENAI_API_KEY) {
+  if (!process.env.GROQ_API_KEY) {
     return Response.json(
-      { error: "OPENAI_API_KEY is not configured" },
+      { error: "GROQ_API_KEY is not configured" },
       { status: 500 }
     );
   }
@@ -159,7 +163,7 @@ export async function POST(req: Request) {
     }
 
     const response = await client.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "llama-3.3-70b-versatile",
       max_tokens: 2048,
       response_format: { type: "json_object" },
       messages: [
