@@ -31,7 +31,7 @@ ${documentText.slice(0, 32000)}
 Answer questions about this document clearly and in plain language. Be specific — reference the actual document content when relevant. Keep answers concise (2-4 sentences unless more detail is needed). If something is not covered in the document, say so clearly.`;
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.0-flash",
       systemInstruction,
     });
 
