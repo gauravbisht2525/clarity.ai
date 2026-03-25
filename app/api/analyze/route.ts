@@ -1,6 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
-import * as pdfParse from "pdf-parse";
 import type { DocumentAnalysis } from "@/types/analysis";
+// NOTE: pdf-parse is NOT imported at module level.
+// The top-level import triggers a filesystem test-fixture check that crashes
+// Vercel serverless functions. Instead we dynamically import the inner lib
+// (pdf-parse/lib/pdf-parse.js) only when a PDF is actually being processed.
 
 const client = new Anthropic();
 
@@ -141,7 +144,12 @@ export async function POST(req: Request) {
       const buffer = Buffer.from(await file.arrayBuffer());
 
       if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
-        const parsed = await (pdfParse as unknown as (buf: Buffer) => Promise<{ text: string }>)(buffer);
+        // Dynamically import the core lib to avoid module-init filesystem crash on Vercel.
+        // Sub-path not covered by @types/pdf-parse — cast manually.
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const { default: pdfParseFn } = await import("pdf-parse/lib/pdf-parse.js");
+        const parsed = await (pdfParseFn as (buf: Buffer) => Promise<{ text: string }>)(buffer);
         documentText = parsed.text;
       } else {
         documentText = buffer.toString("utf-8");
