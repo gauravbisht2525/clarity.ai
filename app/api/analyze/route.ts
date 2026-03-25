@@ -1,10 +1,10 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 import type { DocumentAnalysis } from "@/types/analysis";
 
 // Vercel Hobby allows up to 60s
 export const maxDuration = 60;
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? "");
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const SYSTEM_PROMPT = `You are a document analysis assistant. Analyze the provided document and return a JSON object with exactly this structure:
 
@@ -114,9 +114,9 @@ const MOCK_ANALYSIS: Omit<DocumentAnalysis, "documentText" | "fileName"> = {
 };
 
 export async function POST(req: Request) {
-  if (!process.env.GEMINI_API_KEY) {
+  if (!process.env.OPENAI_API_KEY) {
     return Response.json(
-      { error: "GEMINI_API_KEY is not configured" },
+      { error: "OPENAI_API_KEY is not configured" },
       { status: 500 }
     );
   }
@@ -137,74 +137,46 @@ export async function POST(req: Request) {
       });
     }
 
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-      systemInstruction: SYSTEM_PROMPT,
-    });
-
-    let result;
-    let rawDocumentText = text?.slice(0, 48000) ?? "";
-    let isPDFUpload = false;
+    let documentText = text?.slice(0, 48000) ?? "";
 
     if (file) {
       const buffer = Buffer.from(await file.arrayBuffer());
       const isPDF = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 
       if (isPDF) {
-        isPDFUpload = true;
-        // Send the PDF directly to Gemini as base64 — no parsing library needed.
-        // Gemini natively understands PDF structure, layout, and text.
-        result = await model.generateContent([
-          {
-            inlineData: {
-              data: buffer.toString("base64"),
-              mimeType: "application/pdf",
-            },
-          },
-          "Analyze this document and return the structured JSON as instructed.",
-        ]);
+        // Dynamically import pdf-parse (serverExternalPackages prevents module-init crash)
+        // @ts-ignore
+        const pdfParse = (await import("pdf-parse")).default;
+        const parsed = await (pdfParse as (buf: Buffer) => Promise<{ text: string }>)(buffer);
+        documentText = parsed.text.slice(0, 48000);
       } else {
-        rawDocumentText = buffer.toString("utf-8").slice(0, 48000);
-        if (!rawDocumentText.trim()) {
-          return Response.json({ error: "No document content found" }, { status: 400 });
-        }
-        result = await model.generateContent(`Analyze this document:\n\n${rawDocumentText}`);
+        documentText = buffer.toString("utf-8").slice(0, 48000);
       }
-    } else if (rawDocumentText.trim()) {
-      result = await model.generateContent(`Analyze this document:\n\n${rawDocumentText}`);
-    } else {
+    }
+
+    if (!documentText.trim()) {
       return Response.json({ error: "No document content found" }, { status: 400 });
     }
 
-    const raw = result.response.text();
+    const response = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      max_tokens: 2048,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: `Analyze this document:\n\n${documentText}` },
+      ],
+    });
+
+    const raw = response.choices[0].message.content ?? "";
 
     let parsed: Omit<DocumentAnalysis, "documentText" | "fileName">;
     try {
       parsed = JSON.parse(raw);
     } catch {
-      // Strip potential markdown fences if the model added them
       const clean = raw.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
       parsed = JSON.parse(clean);
     }
-
-    // Build chat context. For PDFs we don't have raw text, so construct a
-    // rich readable summary from the analysis so follow-up Q&A still works.
-    const documentText = isPDFUpload
-      ? [
-          `Document: ${fileName}`,
-          "",
-          `Summary: ${parsed.summary}`,
-          "",
-          "Key Points:",
-          ...parsed.keyPoints.map((kp) => `- ${kp.title}: ${kp.detail}`),
-          "",
-          "Risks:",
-          ...parsed.risks.map((r) => `- [${r.severity.toUpperCase()}] ${r.title}: ${r.body}`),
-          "",
-          "Recommended Actions:",
-          ...parsed.actions.map((a) => `- ${a.text}`),
-        ].join("\n")
-      : rawDocumentText;
 
     const analysis: DocumentAnalysis = {
       ...parsed,
