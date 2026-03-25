@@ -4,11 +4,6 @@ import type { DocumentAnalysis } from "@/types/analysis";
 // Vercel Hobby allows up to 60s
 export const maxDuration = 60;
 
-// NOTE: pdf-parse is NOT imported at module level.
-// The top-level import triggers a filesystem test-fixture check that crashes
-// Vercel serverless functions. Instead we dynamically import the inner lib
-// (pdf-parse/lib/pdf-parse.js) only when a PDF is actually being processed.
-
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? "");
 
 const SYSTEM_PROMPT = `You are a document analysis assistant. Analyze the provided document and return a JSON object with exactly this structure:
@@ -142,39 +137,44 @@ export async function POST(req: Request) {
       });
     }
 
-    let documentText = text || "";
-
-    if (file) {
-      const buffer = Buffer.from(await file.arrayBuffer());
-
-      if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
-        // Dynamically import the core lib to avoid module-init filesystem crash on Vercel.
-        // Sub-path not covered by @types/pdf-parse — cast manually.
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const { default: pdfParseFn } = await import("pdf-parse/lib/pdf-parse.js");
-        const parsed = await (pdfParseFn as (buf: Buffer) => Promise<{ text: string }>)(buffer);
-        documentText = parsed.text;
-      } else {
-        documentText = buffer.toString("utf-8");
-      }
-    }
-
-    if (!documentText.trim()) {
-      return Response.json({ error: "No document content found" }, { status: 400 });
-    }
-
-    // Truncate to stay within context limits (~12k tokens)
-    const truncated = documentText.slice(0, 48000);
-
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
       systemInstruction: SYSTEM_PROMPT,
     });
 
-    const result = await model.generateContent(
-      `Analyze this document:\n\n${truncated}`
-    );
+    let result;
+    let rawDocumentText = text?.slice(0, 48000) ?? "";
+    let isPDFUpload = false;
+
+    if (file) {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const isPDF = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+
+      if (isPDF) {
+        isPDFUpload = true;
+        // Send the PDF directly to Gemini as base64 — no parsing library needed.
+        // Gemini natively understands PDF structure, layout, and text.
+        result = await model.generateContent([
+          {
+            inlineData: {
+              data: buffer.toString("base64"),
+              mimeType: "application/pdf",
+            },
+          },
+          "Analyze this document and return the structured JSON as instructed.",
+        ]);
+      } else {
+        rawDocumentText = buffer.toString("utf-8").slice(0, 48000);
+        if (!rawDocumentText.trim()) {
+          return Response.json({ error: "No document content found" }, { status: 400 });
+        }
+        result = await model.generateContent(`Analyze this document:\n\n${rawDocumentText}`);
+      }
+    } else if (rawDocumentText.trim()) {
+      result = await model.generateContent(`Analyze this document:\n\n${rawDocumentText}`);
+    } else {
+      return Response.json({ error: "No document content found" }, { status: 400 });
+    }
 
     const raw = result.response.text();
 
@@ -187,9 +187,28 @@ export async function POST(req: Request) {
       parsed = JSON.parse(clean);
     }
 
+    // Build chat context. For PDFs we don't have raw text, so construct a
+    // rich readable summary from the analysis so follow-up Q&A still works.
+    const documentText = isPDFUpload
+      ? [
+          `Document: ${fileName}`,
+          "",
+          `Summary: ${parsed.summary}`,
+          "",
+          "Key Points:",
+          ...parsed.keyPoints.map((kp) => `- ${kp.title}: ${kp.detail}`),
+          "",
+          "Risks:",
+          ...parsed.risks.map((r) => `- [${r.severity.toUpperCase()}] ${r.title}: ${r.body}`),
+          "",
+          "Recommended Actions:",
+          ...parsed.actions.map((a) => `- ${a.text}`),
+        ].join("\n")
+      : rawDocumentText;
+
     const analysis: DocumentAnalysis = {
       ...parsed,
-      documentText: truncated,
+      documentText,
       fileName,
     };
 
