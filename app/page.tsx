@@ -25,6 +25,7 @@ export default function HomePage() {
   const [pasteText, setPasteText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [showSignupModal, setShowSignupModal] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (isSignedIn && showSignupModal) setShowSignupModal(false);
@@ -106,11 +107,13 @@ export default function HomePage() {
         <Sidebar
           onSelectAnalysis={handleSelectFromHistory}
           onUploadNew={handleUploadNew}
+          mobileOpen={mobileMenuOpen}
+          onMobileClose={() => setMobileMenuOpen(false)}
         />
 
         {/* Right column */}
         <div className="flex-1 flex flex-col min-w-0">
-          <Header />
+          <Header onMenuToggle={() => setMobileMenuOpen(true)} />
 
           {view === "analyzing" ? (
             <div className="flex-1 flex items-center justify-center">

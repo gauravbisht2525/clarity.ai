@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useUser, SignInButton } from "@clerk/nextjs";
-import { LogIn, Upload } from "lucide-react";
+import { LogIn, Upload, X } from "lucide-react";
 import HistoryItem from "@/components/sidebar/HistoryItem";
 import type { HistoryEntry } from "@/types/history";
 import type { DocumentAnalysis } from "@/types/analysis";
@@ -12,9 +12,18 @@ interface SidebarProps {
   refreshKey?: number;
   onSelectAnalysis?: (analysis: DocumentAnalysis, id?: string) => void;
   onUploadNew?: () => void;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
-export default function Sidebar({ activeHistoryId, refreshKey = 0, onSelectAnalysis, onUploadNew }: SidebarProps) {
+export default function Sidebar({
+  activeHistoryId,
+  refreshKey = 0,
+  onSelectAnalysis,
+  onUploadNew,
+  mobileOpen = false,
+  onMobileClose,
+}: SidebarProps) {
   const { isSignedIn, isLoaded } = useUser();
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,13 +42,23 @@ export default function Sidebar({ activeHistoryId, refreshKey = 0, onSelectAnaly
     setHistory((prev) => prev.filter((item) => item.id !== id));
   }
 
-  return (
-    <aside className="hidden md:flex w-60 shrink-0 flex-col border-r border-line bg-background">
+  function handleSelect(analysis: DocumentAnalysis, id?: string) {
+    onSelectAnalysis?.(analysis, id);
+    onMobileClose?.(); // auto-close drawer on mobile after selection
+  }
 
+  function handleUploadNew() {
+    onUploadNew?.();
+    onMobileClose?.();
+  }
+
+  // Shared inner content
+  const content = (
+    <>
       {/* Upload New button */}
       <div className="px-3 py-4 border-b border-line shrink-0">
         <button
-          onClick={onUploadNew}
+          onClick={handleUploadNew}
           className="w-full flex items-center gap-2 font-ui text-[13px] font-medium text-secondary border border-border rounded-xl px-3 py-2.5 hover:text-primary hover:border-secondary bg-surface transition-colors duration-150"
         >
           <Upload className="w-4 h-4 shrink-0" strokeWidth={1.5} />
@@ -57,7 +76,6 @@ export default function Sidebar({ activeHistoryId, refreshKey = 0, onSelectAnaly
       {/* History list */}
       <div className="flex-1 overflow-y-auto pb-2">
 
-        {/* Loading */}
         {(!isLoaded || loading) && (
           <div className="flex justify-center py-8">
             <div
@@ -67,7 +85,6 @@ export default function Sidebar({ activeHistoryId, refreshKey = 0, onSelectAnaly
           </div>
         )}
 
-        {/* Not signed in */}
         {isLoaded && !loading && !isSignedIn && (
           <div className="flex flex-col items-center gap-3 px-4 py-6 text-center">
             <p className="font-ui text-[12px] text-muted leading-[1.5]">
@@ -82,7 +99,6 @@ export default function Sidebar({ activeHistoryId, refreshKey = 0, onSelectAnaly
           </div>
         )}
 
-        {/* Empty state */}
         {isLoaded && !loading && isSignedIn && history.length === 0 && (
           <div className="px-4 py-6 text-center">
             <p className="font-ui text-[12px] text-muted leading-[1.5]">
@@ -91,7 +107,6 @@ export default function Sidebar({ activeHistoryId, refreshKey = 0, onSelectAnaly
           </div>
         )}
 
-        {/* History items */}
         {isLoaded && !loading && isSignedIn && history.length > 0 &&
           history.map((item) => (
             <HistoryItem
@@ -99,7 +114,7 @@ export default function Sidebar({ activeHistoryId, refreshKey = 0, onSelectAnaly
               item={item}
               isActive={item.id === activeHistoryId}
               onClick={() =>
-                onSelectAnalysis?.({
+                handleSelect({
                   summary: item.summary,
                   keyPoints: item.key_points,
                   risks: item.risks,
@@ -113,6 +128,52 @@ export default function Sidebar({ activeHistoryId, refreshKey = 0, onSelectAnaly
           ))
         }
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* ── Desktop sidebar (in-flow) ── */}
+      <aside className="hidden md:flex w-60 shrink-0 flex-col border-r border-line bg-background">
+        {content}
+      </aside>
+
+      {/* ── Mobile drawer (fixed overlay) ── */}
+      <div className="md:hidden">
+        {/* Backdrop */}
+        <div
+          className={[
+            "fixed inset-0 z-40 bg-black/60 transition-opacity duration-200",
+            mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
+          ].join(" ")}
+          onClick={onMobileClose}
+          aria-hidden="true"
+        />
+
+        {/* Drawer panel */}
+        <aside
+          className={[
+            "fixed inset-y-0 left-0 z-50 w-72 flex flex-col border-r border-line bg-background transition-transform duration-200",
+            mobileOpen ? "translate-x-0" : "-translate-x-full",
+          ].join(" ")}
+        >
+          {/* Drawer header with close button */}
+          <div className="flex items-center justify-between px-4 h-16 border-b border-line shrink-0">
+            <span className="font-display text-xl font-light text-white tracking-tight">
+              Clarity.ai
+            </span>
+            <button
+              onClick={onMobileClose}
+              aria-label="Close menu"
+              className="text-muted hover:text-secondary transition-colors duration-150"
+            >
+              <X className="w-5 h-5" strokeWidth={1.5} />
+            </button>
+          </div>
+
+          {content}
+        </aside>
+      </div>
+    </>
   );
 }

@@ -30,6 +30,7 @@ export default function ResultsPage() {
   const [activeHistoryId, setActiveHistoryId] = useState<string | undefined>(undefined);
   const [selectedPoint, setSelectedPoint] = useState<SelectedPoint>(null);
   const [sidebarRefresh, setSidebarRefresh] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Chat state
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -149,11 +150,13 @@ export default function ResultsPage() {
           refreshKey={sidebarRefresh}
           onSelectAnalysis={handleSelectFromHistory}
           onUploadNew={handleUploadNew}
+          mobileOpen={mobileMenuOpen}
+          onMobileClose={() => setMobileMenuOpen(false)}
         />
 
         {/* Main content */}
         <div className="flex-1 flex flex-col min-w-0">
-          <Header />
+          <Header onMenuToggle={() => setMobileMenuOpen(true)} />
 
           {/* Scrollable results — key forces full remount when document switches */}
           <div key={contentKey} className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-[60px] py-4 md:py-8">
