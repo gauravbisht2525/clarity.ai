@@ -58,7 +58,9 @@ export async function POST(req: Request) {
 
 ${context}
 
-Answer questions about this document clearly and in plain language. Be specific — reference the actual content when relevant. Keep answers concise (2–4 sentences unless more detail is needed). If something is not covered, say so clearly.`;
+Answer questions about this document clearly and in plain language. Be specific — reference the actual content when relevant. Keep answers concise (2–4 sentences unless more detail is needed).
+
+IMPORTANT: If the user's question is not related to the document at all (e.g. general knowledge, trivia, or topics completely unrelated to the document's content), respond with exactly: "This question is not related to the document. Please ask something about the document I've analyzed for you." Do not answer off-topic questions under any circumstances.`;
 
     const response = await client.chat.completions.create({
       model: "llama-3.3-70b-versatile",
