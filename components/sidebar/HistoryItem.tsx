@@ -12,7 +12,6 @@ interface HistoryItemProps {
 }
 
 export default function HistoryItem({ item, isActive, onClick, onDelete }: HistoryItemProps) {
-  const [hovered, setHovered] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const date = new Date(item.created_at).toLocaleDateString("en-US", {
@@ -37,8 +36,9 @@ export default function HistoryItem({ item, isActive, onClick, onDelete }: Histo
 
   return (
     <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === "Enter" && onClick()}
       className={[
         "group flex items-start gap-2 px-3 py-3 transition-colors duration-150 cursor-pointer",
         isActive ? "bg-surface" : "hover:bg-surface",
@@ -54,20 +54,24 @@ export default function HistoryItem({ item, isActive, onClick, onDelete }: Histo
         <span className="font-ui text-[11px] text-muted">{date}</span>
       </div>
 
-      {/* Delete button — visible on hover */}
-      {hovered && (
-        <button
-          onClick={handleDelete}
-          disabled={deleting}
-          aria-label="Delete"
-          className="shrink-0 text-muted hover:text-primary transition-colors duration-150 mt-0.5"
-        >
-          {deleting
-            ? <span className="w-3.5 h-3.5 block rounded-full border border-muted animate-spin" />
-            : <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
-          }
-        </button>
-      )}
+      {/* Delete — always visible on touch devices, hover-only on pointer devices */}
+      <button
+        onClick={handleDelete}
+        disabled={deleting}
+        aria-label="Delete analysis"
+        className={[
+          "shrink-0 transition-colors duration-150 mt-0.5",
+          "text-muted hover:text-primary",
+          // pointer devices: hide until row is hovered
+          // touch devices: always visible
+          "opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100",
+        ].join(" ")}
+      >
+        {deleting
+          ? <span className="w-3.5 h-3.5 block rounded-full border border-muted animate-spin" />
+          : <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
+        }
+      </button>
     </div>
   );
 }

@@ -130,12 +130,19 @@ export default function ResultsPage() {
 
   if (!analysis) {
     return (
-      <div className="flex flex-col min-h-screen bg-background">
-        <Header />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="w-10 h-10 rounded-full border-4 border-border animate-spin"
-            style={{ borderTopColor: "var(--color-primary)" }} />
-        </main>
+      <div className="h-screen flex bg-background">
+        <Sidebar
+          mobileOpen={mobileMenuOpen}
+          onMobileClose={() => setMobileMenuOpen(false)}
+          onUploadNew={handleUploadNew}
+        />
+        <div className="flex-1 flex flex-col min-w-0">
+          <Header onMenuToggle={() => setMobileMenuOpen(true)} />
+          <main className="flex-1 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full border-4 border-border animate-spin"
+              style={{ borderTopColor: "var(--color-primary)" }} />
+          </main>
+        </div>
       </div>
     );
   }

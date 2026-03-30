@@ -183,6 +183,16 @@ export async function POST(req: Request) {
       parsed = JSON.parse(clean);
     }
 
+    // Runtime shape validation — guard against malformed AI responses
+    if (
+      typeof parsed.summary !== "string" ||
+      !Array.isArray(parsed.keyPoints) ||
+      !Array.isArray(parsed.risks) ||
+      !Array.isArray(parsed.actions)
+    ) {
+      throw new Error("AI returned an unexpected response structure");
+    }
+
     const analysis: DocumentAnalysis = {
       ...parsed,
       documentText,

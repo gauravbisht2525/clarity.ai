@@ -63,6 +63,12 @@ export default function HomePage() {
 
     if (!hasContent) return;
 
+    // Guard against extremely large pastes that would exceed the API limit
+    if (view === "paste" && pasteText.length > 150_000) {
+      setError("Pasted text is too long. Please trim it to under 150,000 characters.");
+      return;
+    }
+
     if (!isSignedIn && getUsageCount() >= FREE_LIMIT) {
       setShowSignupModal(true);
       return;
